@@ -29,9 +29,9 @@ public:
     HashTable(const HashTable& other);
     ~HashTable();
     HashTable& operator=(const HashTable& other);
-    HashTable(size_type buckets);
+    explicit HashTable(size_type buckets);
 
-    bool is_empty() const;
+    [[nodiscard]] bool is_empty() const;
     size_t size() const;
 
     void make_empty();
@@ -105,6 +105,67 @@ HashTable<Key, Hash> &HashTable<Key, Hash>::operator=(const HashTable &other) {
         // Use the list's copy assignment to copy the whole list
         table[i].operator=(other.table[i]);
     }
+}
+
+// Paramaterized constructor that will allow the user to set the amount of buckets
+template<class Key, class Hash>
+HashTable<Key, Hash>::HashTable(HashTable::size_type buckets) {
+    // Set our bucket size and initialize the other variables
+    buckets = buckets;
+    currentSize = 0;
+    maxLoad = 1;
+    table = new std::vector<std::list<Key>>[buckets];
+
+}
+
+// Function to see if the hashtable is empty
+template<class Key, class Hash>
+bool HashTable<Key, Hash>::is_empty() const {
+
+    // Iterate through each bucket and see if it contains anything, if it does, return false
+    for (int i = 0; i < buckets; i++){
+        if (table[i] == NULL) {
+            return false;
+        }
+    }
+    // If we've reached this code, then none of the buckets had a list
+    return true;
+}
+
+// Function to return the number of values currently in the table
+template<class Key, class Hash>
+size_t HashTable<Key, Hash>::size() const {
+    return currentSize;
+}
+
+// Function to completely empty out the hash table
+template<class Key, class Hash>
+void HashTable<Key, Hash>::make_empty() {
+    for (int i = 0; i < buckets; i++) {
+        // Destroy the list
+        std::destroy(table[i].begin(), table[i].end());
+        // Set each linked list equal to null as we go
+        table[i] = NULL;
+    }
+
+}
+
+// Inserts the given value into the hash table, and rehashes if the maximum load factor is exceeded
+template<class Key, class Hash>
+bool HashTable<Key, Hash>::insert(const value_type &value) {
+    return false;
+}
+
+// Removes the given value from the hash table
+template<class Key, class Hash>
+size_t HashTable<Key, Hash>::remove(const key_type &key) {
+    return 0;
+}
+
+// Returns true or false depending on whether the hashtable contains the given value or not
+template<class Key, class Hash>
+bool HashTable<Key, Hash>::contains(const key_type &key) {
+    return false;
 }
 
 #endif  // HASHTABLE_SEPARATE_CHAINING_H
