@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.21)
+project(221Lab6)
+
+set(CMAKE_CXX_STANDARD 17)
+
+add_executable(separate_chaining hashtable_separate_chaining.cpp hashtable_separate_chaining.h separate_chaining_compile_test.cpp separate_chaining_memory_errors.cpp)
+
+add_executable(open_addressing open_addressing_compile_test.cpp open_addressing_memory_errors.cpp hashtable_open_addressing.h hashtable_open_addressing_tests.cpp)
