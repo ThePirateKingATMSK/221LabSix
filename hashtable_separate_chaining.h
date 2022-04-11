@@ -24,15 +24,6 @@ private:
     int bucketCount;
     int maxLoad;
 
-    // Helper function to find the bucket index that a certain key should belong to
-    int findSpot(const key_type& key);
-
-    // Helper function to find what the hash of the key should be
-    int hashKey(const key_type& key) {
-        // Simple mod hash
-        //return (key % 10);
-        return 1;
-    };
 
 public:
     HashTable();
@@ -74,6 +65,11 @@ HashTable<Key, Hash>::HashTable() {
     currentSize = 0;
     maxLoad = 1;
     table = new std::vector<std::list<Key>>[bucketCount];
+
+    // Initialize the lists within the vector
+    for (int i = 0; i < bucketCount; i++) {
+        table[i] = std::list<Key>();
+    }
 }
 
 // Copy constructor, makes one has table identical to the other
@@ -123,12 +119,17 @@ HashTable<Key, Hash> &HashTable<Key, Hash>::operator=(const HashTable &other) {
 // Paramaterized constructor that will allow the user to set the amount of buckets
 template<class Key, class Hash>
 HashTable<Key, Hash>::HashTable(HashTable::size_type buckets) {
+
     // Set our bucket size and initialize the other variables
     bucketCount = buckets;
     currentSize = 0;
     maxLoad = 1;
     table = new std::vector<std::list<Key>>[bucketCount];
 
+    // Initialize the lists within the vector
+    for (int i = 0; i < bucketCount; i++) {
+        table->push_back(std::list<value_type>());
+    }
 }
 
 // Function to see if the hashtable is empty
@@ -154,31 +155,34 @@ size_t HashTable<Key, Hash>::size() const {
 // Function to completely empty out the hash table
 template<class Key, class Hash>
 void HashTable<Key, Hash>::make_empty() {
-    for (int i = 0; i < bucketCount; i++) {
-        // Destroy the list in each bucket
-        std::destroy(table[i].begin(), table[i].end());
+
+    // For all of the lists in our vector, clear that list
+    for(int i = 0; i < table->size(); i++) {
+        table->at(i).clear();
     }
 }
 
 // Inserts the given value into the hash table, and rehashes if the maximum load factor is exceeded
+// WORKING
 template<class Key, class Hash>
 bool HashTable<Key, Hash>::insert(const value_type &value) {
 
+    size_t hash_value = Hash{}(value);
+    hash_value = hash_value % bucketCount;
 
-    int index = hashKey(value);
-
-    std::list<Key> bucketList;
-    // Check if the value already exists
-    for (int i = 0; i < bucketCount; i++) {
-        std::cout << table[i].size() << std::endl;
+    // Need to initialize all of the lists in the constructors too
+    auto & hashList = table->at(hash_value);
+    // Use the find function to check all elements from the beginning to the end of the list
+    if (std::find(std::begin(hashList), std::end(hashList), value) != std::end(hashList)){
+        // Return false if there's a duplicate item
+        return false;
     }
 
-
-    // It's already a vector of lists, so we can just push the value back once we've found the index.
-    std::cout << table[index].size() << std::endl;
+    // If we've passed the loop, we can insert the item
+    table->at(hash_value).push_back(value);
     currentSize += 1;
 
-    // Check if we have to rehash
+    // Check if we need to rehash
     if (load_factor() > maxLoad) {
         rehash(currentSize);
     }
@@ -189,18 +193,24 @@ bool HashTable<Key, Hash>::insert(const value_type &value) {
 // Checks if an element exists in a hash table and removes it if it does, or does nothing if it's not present
 template<class Key, class Hash>
 size_t HashTable<Key, Hash>::remove(const key_type &key) {
-    for (int i = 0; i < bucketCount; i++) {
-        // Check to see if we can find the element
-        if (i == 2) {
-            // Use the same function to find the element again and remove it from the list
-            //table[i].remove(table[i].find(table[i].begin(), table[i].end(), key));
-            currentSize -= 1;
-            return 1;
-        }
+
+    // Hash the key for use
+    size_t hash_value = Hash{}(key);
+    hash_value = hash_value % bucketCount;
+
+    auto & hashList = table->at(hash_value);
+    // Use the find function to check all elements from the beginning to the end of the list
+    auto itr = std::find(std::begin(hashList), std::end(hashList), key);
+
+    if (itr == std::end(hashList)) {
+        // Return 0, since we didn't remove anything
+        return 0;
     }
 
-    // If we exit the loop without having returned, then the item didn't exist, so return 0
-    return 0;
+    // Erase the object and update the current size
+    hashList.erase(itr);
+    currentSize -= 1;
+    return 1;
 }
 
 // Returns true or false depending on whether the hashtable contains the given value or not
