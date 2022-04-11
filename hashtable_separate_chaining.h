@@ -24,31 +24,25 @@ private:
     int bucketCount;
     int maxLoad;
 
-
 public:
     HashTable();
     HashTable(const HashTable& other);
     ~HashTable();
     HashTable& operator=(const HashTable& other);
     explicit HashTable(size_type buckets);
-
     [[nodiscard]] bool is_empty() const;
     size_t size() const;
-
     void make_empty();
     bool insert(const value_type& value);
     size_t remove(const key_type& key);
     bool contains(const key_type& key);
-
     size_t bucket_count() const;
     size_t bucket_size(size_t n) const;
     size_t bucket(const key_type& key) const;
-
     float load_factor() const;
     float max_load_factor() const;
     void max_load_factor(float mlf);
     void rehash(size_type count);
-
     void print_table(std::ostream& os=std::cout) const;
 
     // Optional
@@ -82,11 +76,10 @@ HashTable<Key, Hash>::HashTable(const HashTable &other) {
     currentSize = other.currentSize;
     table = new std::vector<std::list<Key>>[bucketCount];
 
-
     for (int i = 0; i < other.buckets; i++) {
         // Use the list's copy assignment to copy the whole list
         table[i].operator=(other.table[i]);
-        }
+    }
 }
 
 template<class Key, class Hash>
@@ -223,7 +216,6 @@ bool HashTable<Key, Hash>::contains(const key_type &key) {
             return true;
         }
     }
-
     // If we make it out of that loop, we didn't find the element so return false
     return false;
 }
@@ -234,7 +226,6 @@ template<class Key, class Hash>
 size_t HashTable<Key, Hash>::bucket_count() const {
     return bucketCount;
 }
-
 
 // Function to return the number of items in a given bucket
 template<class Key, class Hash>
@@ -275,7 +266,6 @@ float HashTable<Key, Hash>::max_load_factor() const {
 // Function to set a new maximum load factor, and rehash if necessary
 template<class Key, class Hash>
 void HashTable<Key, Hash>::max_load_factor(float mlf) {
-
     maxLoad = mlf;
 
     // Check if we've exceeded our new load factor
@@ -287,12 +277,10 @@ void HashTable<Key, Hash>::max_load_factor(float mlf) {
 // Function to rehash the table when necessary
 template<class Key, class Hash>
 void HashTable<Key, Hash>::rehash(HashTable::size_type count) {
-    }
+}
 
 template<class Key, class Hash>
 void HashTable<Key, Hash>::print_table(std::ostream &os) const {
-
 }
-
 
 #endif  // HASHTABLE_SEPARATE_CHAINING_H
