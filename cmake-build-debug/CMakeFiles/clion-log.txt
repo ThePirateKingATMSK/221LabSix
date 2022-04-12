@@ -1,4 +1,4 @@
-/home/tpk/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/213.7172.20/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/tpk/code/cpp/221LabSix
+/snap/clion/184/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/tpk/code/cpp/221labsix
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/tpk/code/cpp/221LabSix/cmake-build-debug
+-- Build files have been written to: /home/tpk/code/cpp/221labsix/cmake-build-debug

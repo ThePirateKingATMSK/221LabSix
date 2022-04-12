@@ -15,7 +15,6 @@ public:
     using value_type = Key;
     using hash = Hash;
     using size_type = size_t;
-    // you can write your code below this
 
 private:
     // A vector containing the lists
@@ -62,7 +61,7 @@ HashTable<Key, Hash>::HashTable() {
 
     // Initialize the lists within the vector
     for (int i = 0; i < bucketCount; i++) {
-        table[i] = std::list<Key>();
+        table->push_back(std::list<Key>());
     }
 }
 
@@ -71,14 +70,14 @@ template<class Key, class Hash>
 HashTable<Key, Hash>::HashTable(const HashTable &other) {
 
     // Copy the variables over
-    bucketCount = other.buckets;
+    bucketCount = other.bucketCount;
     maxLoad = other.maxLoad;
     currentSize = other.currentSize;
     table = new std::vector<std::list<Key>>[bucketCount];
 
-    for (int i = 0; i < other.buckets; i++) {
+    for (int i = 0; i < other.bucketCount; i++) {
         // Use the list's copy assignment to copy the whole list
-        table[i].operator=(other.table[i]);
+        table->push_back(other.table->at(i));
     }
 }
 
@@ -102,9 +101,9 @@ HashTable<Key, Hash> &HashTable<Key, Hash>::operator=(const HashTable &other) {
     maxLoad = other.maxLoad;
     currentSize = other.currentSize;
 
-    for (int i = 0; i < other.buckets; i++) {
+    for (int i = 0; i < other.bucketCount; i++) {
         // Use the list's copy assignment to copy the whole list
-        table[i].operator=(other.table[i]);
+        table->push_back(other.table->at(i));
     }
     return *this;
 }
@@ -131,7 +130,7 @@ bool HashTable<Key, Hash>::is_empty() const {
 
     // Iterate through each bucket and see if it contains anything, if it does, return false
     for (int i = 0; i < bucketCount; i++){
-        if (table[i].empty()) {
+        if (table->at(i).empty()) {
             return false;
         }
     }
@@ -177,7 +176,7 @@ bool HashTable<Key, Hash>::insert(const value_type &value) {
 
     // Check if we need to rehash
     if (load_factor() > maxLoad) {
-        rehash(currentSize);
+        rehash(currentSize * 2);
     }
 
     return true;
@@ -210,13 +209,28 @@ size_t HashTable<Key, Hash>::remove(const key_type &key) {
 template<class Key, class Hash>
 bool HashTable<Key, Hash>::contains(const key_type &key) {
 
-    // Check the list in each bucket for the given key
-    for (int i = 0; i < bucketCount; i++) {
-        if (table[i].find(table[i].begin(), table[i].end(), key)) {
+    // Hash the key for use
+    size_t hash_value = Hash{}(key);
+    hash_value = hash_value % bucketCount;
+
+    std::list<key_type> hashList = table->at(hash_value);
+
+    key_type other_value;
+
+    // Grab the key from each index of the list and check it against the parameter
+    for (int i = 0; i < hashList.size(); i++) {
+
+        // Use the keys from our shallow copies
+        other_value = hashList.front();
+        // Pop the front after we evaluate it to iterate through our local copy
+        hashList.pop_front();
+
+        if (key == other_value) {
             return true;
         }
     }
-    // If we make it out of that loop, we didn't find the element so return false
+
+    // If we make it past the above expression, then we've found the element
     return false;
 }
 
@@ -236,13 +250,35 @@ size_t HashTable<Key, Hash>::bucket_size(size_t n) const {
     }
 
     // Return the size (amount of items) in that bucket
-    return table[n].size();
+    return table->at(n).size();
 }
 
 // Function that returns the index of the bucket containing the key, or the bucket that would contain it if it existed.
 template<class Key, class Hash>
 size_t HashTable<Key, Hash>::bucket(const key_type &key) const {
-    return 0;
+    // Hash the key for use
+    size_t hash_value = Hash{}(key);
+    hash_value = hash_value % bucketCount;
+
+    std::list<key_type> hashList = table->at(hash_value);
+
+    key_type other_value;
+
+    // Grab the key from each index of the list and check it against the parameter
+    for (int i = 0; i < hashList.size(); i++) {
+
+        // Use the keys from our shallow copies
+        other_value = hashList.front();
+        // Pop the front after we evaluate it to iterate through our local copy
+        hashList.pop_front();
+
+        if (key == other_value) {
+            return hash_value;
+        }
+    }
+
+    // If we make it past the above expression, then we've found the element
+    return hash_value;
 }
 
 // Function to calculate and return the current load factor
@@ -254,7 +290,7 @@ float HashTable<Key, Hash>::load_factor() const {
     }
 
     // Return the calculation if we're not dividing by zero.
-    return (float(bucketCount) / currentSize);
+    return (currentSize / float(bucketCount));
 }
 
 // Function to return the maximum load for that hashtable
@@ -269,7 +305,7 @@ void HashTable<Key, Hash>::max_load_factor(float mlf) {
     maxLoad = mlf;
 
     // Check if we've exceeded our new load factor
-    if (((float(bucketCount)) / currentSize) > maxLoad) {
+    if (load_factor() > maxLoad) {
         rehash(currentSize);
     }
 }
@@ -277,6 +313,43 @@ void HashTable<Key, Hash>::max_load_factor(float mlf) {
 // Function to rehash the table when necessary
 template<class Key, class Hash>
 void HashTable<Key, Hash>::rehash(HashTable::size_type count) {
+/*
+    if (count != 0) {
+        if ((currentSize / count) > maxLoad) {
+            // Add half and then use the int, this effectively rounds up to the next integer each time
+            count = int((size() / max_load_factor()) + 0.5);
+        }
+
+        // Copy the original table so we have all of the elements
+        std::vector<std::list<Key>> copyTable;
+        for (int i = 0; i < bucketCount; i++) {
+            copyTable.push_back(table->at(i));
+        }
+
+        // Reset the new table
+        delete[] table;
+        int oldBucket = bucketCount;
+        table = new std::vector<std::list<Key>>[count];
+        bucketCount = count;
+        currentSize = 0;
+
+        for (int i = 0; i < bucketCount; i++) {
+            table->push_back(std::list<Key>());
+        }
+
+        std::list<Key> hashList;
+        // Nested for loops to insert each value into the new table
+        for (int i = 0; i < oldBucket; i++) {
+            // Get list from vector
+            hashList = copyTable[i];
+            for (int j = 0; j < copyTable.at(i).size(); j++) {
+                // Iterate through each element of the list and insert it to the new table, then pop
+                insert(hashList.front());
+                hashList.pop_front();
+            }
+        }
+    }
+*/
 }
 
 template<class Key, class Hash>
