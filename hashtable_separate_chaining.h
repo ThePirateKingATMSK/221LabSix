@@ -7,6 +7,7 @@
 #include <functional>
 #include <iostream>
 
+
 template <class Key, class Hash=std::hash<Key>>
 class HashTable {
 public:
@@ -22,6 +23,10 @@ private:
     int currentSize;
     int bucketCount;
     int maxLoad;
+
+    // Helper functions to determine if a number is prime, or find the next prime number
+    int nextPrime(int count);
+    bool isPrime(int count);
 
 public:
     HashTable();
@@ -67,7 +72,7 @@ HashTable<Key, Hash>::HashTable() {
 
 // Copy constructor, makes one has table identical to the other
 template<class Key, class Hash>
-HashTable<Key, Hash>::HashTable(const HashTable &other) {
+HashTable<Key, Hash>::HashTable(const HashTable &other){
 
     // Copy the variables over
     bucketCount = other.bucketCount;
@@ -162,8 +167,14 @@ bool HashTable<Key, Hash>::insert(const value_type &value) {
     size_t hash_value = Hash{}(value);
     hash_value = hash_value % bucketCount;
 
-    // Need to initialize all of the lists in the constructors too
-    auto & hashList = table->at(hash_value);
+    std::list<Key> hashList;
+
+    // Check if the table exists at that index, and use an empty list if it doesn't.
+    if (table->size() > hash_value) {
+        hashList = table->at(hash_value);
+    } else {
+        hashList = std::list<Key>();
+    }
     // Use the find function to check all elements from the beginning to the end of the list
     if (std::find(std::begin(hashList), std::end(hashList), value) != std::end(hashList)){
         // Return false if there's a duplicate item
@@ -176,7 +187,7 @@ bool HashTable<Key, Hash>::insert(const value_type &value) {
 
     // Check if we need to rehash
     if (load_factor() > maxLoad) {
-        rehash(currentSize * 2);
+        rehash(bucketCount * 2);
     }
 
     return true;
@@ -213,20 +224,18 @@ bool HashTable<Key, Hash>::contains(const key_type &key) {
     size_t hash_value = Hash{}(key);
     hash_value = hash_value % bucketCount;
 
-    std::list<key_type> hashList = table->at(hash_value);
-
     key_type other_value;
+    std::list<Key> hashList;
 
-    // Grab the key from each index of the list and check it against the parameter
-    for (int i = 0; i < hashList.size(); i++) {
-
-        // Use the keys from our shallow copies
-        other_value = hashList.front();
-        // Pop the front after we evaluate it to iterate through our local copy
-        hashList.pop_front();
-
-        if (key == other_value) {
-            return true;
+    // Nested loop to go through each list in the hashmap checking for the element.
+    for (int i = 0; i < table->size(); i++) {
+        hashList = table->at(i);
+        for (int j = 0; j < hashList.size(); j++) {
+            other_value = hashList.front();
+            hashList.pop_front();
+            if (other_value == key) {
+                return true;
+            }
         }
     }
 
@@ -306,54 +315,104 @@ void HashTable<Key, Hash>::max_load_factor(float mlf) {
 
     // Check if we've exceeded our new load factor
     if (load_factor() > maxLoad) {
-        rehash(currentSize);
+        rehash(bucketCount * 2);
     }
 }
 
 // Function to rehash the table when necessary
 template<class Key, class Hash>
 void HashTable<Key, Hash>::rehash(HashTable::size_type count) {
-/*
-    if (count != 0) {
-        if ((currentSize / count) > maxLoad) {
-            // Add half and then use the int, this effectively rounds up to the next integer each time
-            count = int((size() / max_load_factor()) + 0.5);
-        }
 
-        // Copy the original table so we have all of the elements
-        std::vector<std::list<Key>> copyTable;
-        for (int i = 0; i < bucketCount; i++) {
-            copyTable.push_back(table->at(i));
-        }
 
-        // Reset the new table
-        delete[] table;
-        int oldBucket = bucketCount;
-        table = new std::vector<std::list<Key>>[count];
-        bucketCount = count;
-        currentSize = 0;
+    if (count == bucketCount || table == NULL) {
+        return;
+    }
 
-        for (int i = 0; i < bucketCount; i++) {
-            table->push_back(std::list<Key>());
-        }
+    // If the new buckets would cause us to exceed the maximum load factor, fix the number
+    if (count == 0 || ((float(currentSize) / count) > maxLoad)) {
+        count = int((float(size()) / max_load_factor()) + 0.5);
+    }
 
-        std::list<Key> hashList;
-        // Nested for loops to insert each value into the new table
-        for (int i = 0; i < oldBucket; i++) {
-            // Get list from vector
-            hashList = copyTable[i];
-            for (int j = 0; j < copyTable.at(i).size(); j++) {
-                // Iterate through each element of the list and insert it to the new table, then pop
-                insert(hashList.front());
-                hashList.pop_front();
-            }
+    // Temp vector to store the lists with keys, and a list containing each value from the hashTable
+    std::vector<std::list<Key>> copyVector;
+    std::list<Key> masterList;
+    std::list<Key> tmpList;
+
+    // Loop to create the master list containing all of our elements
+    for (int i = 0; i < table->size(); i++) {
+        copyVector.push_back(table->at(i));
+        tmpList = table->at(i);
+        for (int j = 0; j < tmpList.size(); j++) {
+            masterList.push_front(tmpList.front());
+            tmpList.pop_front();
         }
     }
-*/
+
+    /*
+    // Initialize table to new bucket count
+    currentSize = 0;
+    bucketCount = nextPrime(count);
+    delete[] table;
+    table = new std::vector<std::list<Key>>[bucketCount];
+
+    for (int i = 0; i < bucketCount; i++) {
+        table->push_back(std::list<Key>());
+    }
+
+
+    // Insert each element from our master list into the new hash table
+    for (int i = 0; i < masterList.size(); i++) {
+        Key tmpKey = masterList.front();
+        insert(masterList.front());
+        masterList.pop_front();
+    }
+     */
 }
 
 template<class Key, class Hash>
 void HashTable<Key, Hash>::print_table(std::ostream &os) const {
+}
+
+
+template<class Key, class Hash>
+int HashTable<Key, Hash>::nextPrime(int count) {
+
+    // Handle base case / negative inputs
+    if (count <= 1) {
+        return 2;
+    }
+
+    int returnPrime = count;
+    bool foundPrime = false;
+
+    while (!foundPrime) {
+        if (isPrime(returnPrime)) {
+            foundPrime = true;
+            break;
+        }
+        returnPrime += 1;
+    }
+
+    return returnPrime;
+}
+
+template<class Key, class Hash>
+bool HashTable<Key, Hash>::isPrime(int count) {
+
+    if (count % 2 == 0 || count <= 1) {
+        return false;
+    }
+
+    // Already checked for divisibility by 2, so we can iterate through odd numbers now
+    for (int i = 3; i < (count / 2); i+=2) {
+        if (count % i == 0) {
+            // If this is true, we've found a factor, meaning the number isn't prime
+            return false;
+        }
+    }
+
+    // If we make it through the loop, then the number is prime
+    return true;
 }
 
 #endif  // HASHTABLE_SEPARATE_CHAINING_H

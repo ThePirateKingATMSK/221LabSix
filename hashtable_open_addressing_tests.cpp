@@ -11,7 +11,9 @@ int main() {
 
     std::cout << "initial size is " << table.size() << std::endl;
     std::cout << "initial table size is " << table.table_size() << std::endl;
+    std::cout << "table contains: 'hehehe' " << table.contains(Hashable('hehehe', 4)) << std::endl;
 
+/*
     std::cout << "insert several strings" << std::endl;
     table.insert("And them who hold High Places");
     table.insert("Must be the ones to start");
@@ -72,5 +74,5 @@ int main() {
         std::cout << ss.str() << std::endl;
     }
 
-    return 0;
+    return 0; */
 }

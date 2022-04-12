@@ -35,8 +35,9 @@ int main() {
     std::cout << "size is " << table.size() << std::endl;
     table.make_empty();
     table.insert(Hashable("hey there", 3));
-    table.remove(Hashable("i know it's hard to feel", 2));
-    table.contains(Hashable("like i don't care at all", 7));
+    //table.remove(Hashable("i know it's hard to feel", 2));
+    std::cout << table.contains(Hashable("like i don't care at all", 7)) << std::endl;
+    std::cout << table.contains(Hashable("hey there", 3)) << std::endl;
     std::cout << "table size is " << table.table_size() << std::endl;
-    table.print_table();
+    //table.print_table();
 }
