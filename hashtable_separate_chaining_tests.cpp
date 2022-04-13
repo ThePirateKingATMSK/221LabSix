@@ -27,6 +27,7 @@ int main() {
     std::cout << "initial load factor is " << table.load_factor() << std::endl;
     std::cout << "initial max load factor is " << table.max_load_factor() << std::endl;
 
+    // A bunch of standard insertions
     std::cout << "insert several strings" << std::endl;
     table.insert("And them who hold High Places");
     table.insert("Must be the ones to start");
@@ -45,11 +46,22 @@ int main() {
     table.insert("Sailing into Destiny");
     table.insert("Closer to the Heart");
 
+    // Test contains with positive and negative casese
+    std::cout << "Table contains 'Closer to the Heart'";
+    std::cout << " " << table.contains("Closer to the Heart") << std::endl;
+
+    table.remove("Closer to the Heart");
+    std::cout << "Table contains 'Closer to the Heart'";
+    std::cout << " " << table.contains("Closer to the Heart") << std::endl;
+
+    // Test size, bucket count, load factor, max load factor
     std::cout << "size is " << table.size() << std::endl;
     std::cout << "bucket count is " << table.bucket_count() << std::endl;
     std::cout << "load factor is " << table.load_factor() << std::endl;
     std::cout << "max load factor is " << table.max_load_factor() << std::endl;
 
+
+    // Test print
     {
         std::cout << "print the table" << std::endl;
         std::stringstream ss;

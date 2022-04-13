@@ -39,7 +39,6 @@ private:
         // Constructor for the cell, initializes to empty
         cell() {
             state = 0;
-            data;
         }
     };
 
