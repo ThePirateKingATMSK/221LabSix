@@ -1,3 +1,16 @@
+/*****************************************
+** File:    hashtable_separate_chaining_tests.cpp
+** Project: CSCE 221 Lab 6 Spring 2022
+** Author:  Joshua Hillis
+** Date:    04/12/2022
+** Section: 512
+** E-mail:  joshuahillis292002@tamu.edu
+**
+** This file contains the test suite for the separate chaining header file, it tests all of
+** the functions for 90% coverage.
+**
+***********************************************/
+
 #include <iostream>
 #include <sstream>
 #include "hashtable_separate_chaining.h"
@@ -44,6 +57,7 @@ int main() {
         std::cout << ss.str() << std::endl;
     }
 
+    std::cout << "Table contains Philosop and Plowmen: " << table.contains("Philosophers and Plowmen") << std::endl;
     std::cout << "remove \"Philosophers and Plowmen\"" << std::endl;
     table.remove("Philosophers and Plowmen");
     std::cout << "remove \"Each must know their Part\"" << std::endl;
@@ -97,6 +111,5 @@ int main() {
         table.print_table(ss);
         std::cout << ss.str() << std::endl;
     }
-
     return 0;
 }

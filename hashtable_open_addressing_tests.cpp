@@ -1,3 +1,16 @@
+/*****************************************
+** File:    hashtable_open_addressing_tests.cpp
+** Project: CSCE 221 Lab 6 Spring 2022
+** Author:  Joshua Hillis
+** Date:    04/12/2022
+** Section: 512
+** E-mail:  joshuahillis292002@tamu.edu
+**
+** This file contains the test suite for the open addressing header file, it tests all of
+** the functions for 90% coverage.
+**
+***********************************************/
+
 #include <iostream>
 #include <sstream>
 #include "hashtable_open_addressing.h"
@@ -11,9 +24,8 @@ int main() {
 
     std::cout << "initial size is " << table.size() << std::endl;
     std::cout << "initial table size is " << table.table_size() << std::endl;
-    std::cout << "table contains: 'hehehe' " << table.contains(Hashable('hehehe', 4)) << std::endl;
 
-/*
+
     std::cout << "insert several strings" << std::endl;
     table.insert("And them who hold High Places");
     table.insert("Must be the ones to start");
@@ -34,6 +46,16 @@ int main() {
 
     std::cout << "size is " << table.size() << std::endl;
     std::cout << "table size is " << table.table_size() << std::endl;
+
+    // Testing the copy constructors
+    HashTable<std::string> copyTable(table);
+
+    HashTable<std::string> copyTableTwo;
+    copyTableTwo.operator=(copyTable);
+
+    // Test self assignment
+    copyTableTwo.operator=(copyTableTwo);
+
 
     {
         std::cout << "print the table" << std::endl;
@@ -74,5 +96,5 @@ int main() {
         std::cout << ss.str() << std::endl;
     }
 
-    return 0; */
+    return 0;
 }

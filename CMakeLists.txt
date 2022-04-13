@@ -10,4 +10,5 @@ add_executable(separate_chaining_comptest separate_chaining_compile_test.cpp has
 
 add_executable(open_addressing_test hashtable_open_addressing.h hashtable_open_addressing_tests.cpp)
 add_executable(open_addressing_comptest hashtable_open_addressing.h open_addressing_compile_test.cpp)
+add_executable(open_addressing_memtest hashtable_open_addressing.h open_addressing_memory_errors.cpp)
 
